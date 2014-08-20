@@ -270,6 +270,7 @@ void jabber_chat_pkt_presence( struct im_connection *ic, struct jabber_buddy *bu
 		/* This is pretty messy... Here it sets ext_jid to the real
 		   JID of the participant. Works for non-anonymized channels.
 		   Might break if someone joins a chat twice, though. */
+#if 0
 		for( c = node->children; ( c = xt_find_node( c, "x" ) ); c = c->next )
 			if( ( s = xt_find_attr( c, "xmlns" ) ) &&
 			    ( strcmp( s, XMLNS_MUC_USER ) == 0 ) )
@@ -284,6 +285,7 @@ void jabber_chat_pkt_presence( struct im_connection *ic, struct jabber_buddy *bu
 					break;
 				}
 			}
+#endif
 		
 		/* Make up some other handle, if necessary. */
 		if( bud->ext_jid == NULL )
@@ -443,7 +445,7 @@ void jabber_chat_pkt_message( struct im_connection *ic, struct jabber_buddy *bud
 		return;
 	}
 
-	if ( 0 && bud && jc && bud != jc->me ) {
+	if ( bud && jc && bud != jc->me ) {
 		bare_jid = jabber_get_bare_jid( bud->ext_jid ? bud->ext_jid : bud->full_jid );
 		final_from = bare_jid;
 	} else {
