@@ -443,7 +443,7 @@ void jabber_chat_pkt_message( struct im_connection *ic, struct jabber_buddy *bud
 		return;
 	}
 
-	if ( bud && jc && bud != jc->me ) {
+	if ( 0 && bud && jc && bud != jc->me ) {
 		bare_jid = jabber_get_bare_jid( bud->ext_jid ? bud->ext_jid : bud->full_jid );
 		final_from = bare_jid;
 	} else {
