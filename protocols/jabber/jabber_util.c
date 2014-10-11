@@ -349,6 +349,25 @@ char *jabber_normalize( const char *orig )
 	return new;
 }
 
+/* Similar to jabber_normalize, but works with addresses in the form
+ * resource=chatroom@example.com */
+char *jabber_normalize_ext( const char *orig)
+{
+	int len, i;
+	char *new;
+
+	len = strlen( orig );
+	new = g_new( char, len + 1 );
+
+	for( i = 0; i < len && orig[i] != '='; i ++ )
+		new[i] = orig[i];
+	for( ; orig[i]; i ++ )
+		new[i] = tolower( orig[i] );
+
+	new[i] = 0;
+	return new;
+}
+
 /* Adds a buddy/resource to our list. Returns NULL if full_jid is not really a
    FULL jid or if we already have this buddy/resource. XXX: No, great, actually
    buddies from transports don't (usually) have resources. So we'll really have
@@ -555,7 +574,7 @@ struct jabber_buddy *jabber_buddy_by_ext_jid( struct im_connection *ic, char *ji
 	struct jabber_buddy *bud;
 	char *s, *jid;
 	
-	jid = jabber_normalize( jid_ );
+	jid = jabber_normalize_ext( jid_ );
 	
 	if( ( s = strchr( jid, '=' ) ) == NULL )
 		return NULL;
