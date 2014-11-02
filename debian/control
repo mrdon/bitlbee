@@ -11,8 +11,6 @@ Vcs-Bzr: http://code.bitlbee.org/bitlbee/
 Package: bitlbee
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, debianutils (>= 1.16), bitlbee-common (= ${source:Version})
-Conflicts: bitlbee-libpurple
-Replaces: bitlbee-libpurple
 Description: An IRC to other chat networks gateway (default version)
  This program can be used as an IRC server which forwards everything you
  say to people on other chat networks: Jabber (which includes Google Talk
@@ -21,8 +19,6 @@ Description: An IRC to other chat networks gateway (default version)
 Package: bitlbee-libpurple
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, debianutils (>= 1.16), bitlbee-common (= ${source:Version})
-Conflicts: bitlbee
-Replaces: bitlbee
 Description: An IRC to other chat networks gateway (using libpurple)
  This program can be used as an IRC server which forwards everything you
  say to people on other chat networks: Jabber (which includes Google Talk

@@ -90,6 +90,7 @@ endif
 
 ifeq ($(BITLBEE_LIBPURPLE),1)
 	$(MAKE) -C debian/build-libpurple install-bin DESTDIR=`pwd`/debian/bitlbee-libpurple
+	mv debian/bitlbee-libpurple/usr/sbin/bitlbee debian/bitlbee-libpurple/usr/sbin/bitlbee-libpurple
 	ln -sf debian/bitlbee.prerm debian/bitlbee-libpurple.prerm
 endif
 
