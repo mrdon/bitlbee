@@ -535,9 +535,11 @@ void jabber_parse_muc_item(struct im_connection *ic, struct xt_node *c, gboolean
 		}
 
 	gc = bee_chat_by_title(ic->bee, ic, jid);
+	gboolean new_room = FALSE;
 	if ( !gc ) {
-			gc = imcb_chat_new(ic, jid);
-		}
+		gc = imcb_chat_new(ic, jid);
+		new_room = TRUE;
+	}
 	imcb_chat_name_hint(gc, name);
 	imcb_chat_topic(gc, NULL, topic, 0);
 
@@ -551,9 +553,12 @@ void jabber_parse_muc_item(struct im_connection *ic, struct xt_node *c, gboolean
 		set_setstr( &ircc->set, "auto_join", "true" );
 	}
 
-	/* This cleans everything but leaves the irc channel around,
-     * since it just graduated to a room.*/
-	imcb_chat_free( gc );
+	if ( new_room )
+	{
+		/* This cleans everything but leaves the irc channel around,
+         * since it just graduated to a room.*/
+		imcb_chat_free( gc );
+	}
 }
 
 int jabber_get_vcard( struct im_connection *ic, char *bare_jid )
