@@ -44,7 +44,7 @@ irc_channel_t *irc_channel_new( irc_t *irc, const char *name )
 	ic->name = g_strdup( name );
 	strcpy( ic->mode, CMODE );
 	
-//	irc_channel_add_user( ic, irc->root );
+	irc_channel_add_user( ic, irc->root );
 	
 	irc->channels = g_slist_append( irc->channels, ic );
 	

@@ -447,7 +447,7 @@ static xt_status hipchat_handle_success( struct im_connection *ic, struct xt_nod
 		return XT_ABORT;
 	if( !jabber_iq_disco_server( ic ) )
 		return XT_ABORT;
-	if( !jabber_get_hipchat_profile( ic ) )
+	if( !jabber_get_hipchat_startup( ic ) )
 		return XT_ABORT;
 	if( !jabber_iq_disco_muc( ic, muc_host ) )
 		return XT_ABORT;

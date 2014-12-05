@@ -23,10 +23,15 @@
 
 #include "jabber.h"
 #include "sha1.h"
+#include "../../lib/xmltree.h"
+#include "../nogaim.h"
+#include "../../irc.h"
+#include "../bee.h"
+#include "../../set.h"
 
 static xt_status jabber_parse_roster( struct im_connection *ic, struct xt_node *node, struct xt_node *orig );
 static xt_status jabber_iq_display_vcard( struct im_connection *ic, struct xt_node *node, struct xt_node *orig );
-static xt_status jabber_parse_hipchat_profile( struct im_connection *ic, struct xt_node *node, struct xt_node *orig );
+static xt_status jabber_parse_hipchat_startup( struct im_connection *ic, struct xt_node *node, struct xt_node *orig );
 static xt_status jabber_parse_muc_list( struct im_connection *ic, struct xt_node *node, struct xt_node *orig );
 
 xt_status jabber_pkt_iq( struct xt_node *node, gpointer data )
@@ -482,6 +487,8 @@ int jabber_iq_disco_muc( struct im_connection *ic, char *muc_server )
 	return st;
 }
 
+void jabber_parse_muc_item(struct im_connection *ic, struct xt_node *c, gboolean auto_join );
+
 static xt_status jabber_parse_muc_list( struct im_connection *ic, struct xt_node *node, struct xt_node *orig )
 {
 	struct xt_node *query, *c;
@@ -495,18 +502,27 @@ static xt_status jabber_parse_muc_list( struct im_connection *ic, struct xt_node
 	c = query->children;
 	while( ( c = xt_find_node( c, "item" ) ) )
 	{
-		struct xt_node *c2;
-		struct groupchat *gc;
-		struct irc_channel *ircc;
-		//char *participants = NULL;
-		char *topic = NULL;
-		char *jid = xt_find_attr( c, "jid" );
-		char *name = xt_find_attr( c, "name" );
-		imcb_log( ic, "Debug: adding MUC to channel list: %s - '%s'", jid, name );
+		jabber_parse_muc_item(ic, c, FALSE);
 
-		c2 = xt_find_node_by_attr( c->children, "x", "xmlns", XMLNS_HIPCHAT_MUC );
+		c = c->next;
+	}
+	return XT_HANDLED;
 
-		if( c2 ) {
+}
+
+void jabber_parse_muc_item(struct im_connection *ic, struct xt_node *c, gboolean auto_join) {
+	struct xt_node *c2;
+	struct groupchat *gc;
+	struct irc_channel *ircc;
+	//char *participants = NULL;
+	char *topic = NULL;
+	char *jid = xt_find_attr( c, "jid" );
+	char *name = xt_find_attr( c, "name" );
+	imcb_log( ic, "Debug: adding MUC to channel list: %s - '%s'", jid, name );
+
+	c2 = xt_find_node_by_attr( c->children, "x", "xmlns", XMLNS_HIPCHAT_MUC );
+
+	if( c2 ) {
 			struct xt_node *node;
 			/*
 			if ( ( node = xt_find_node( c2->children, "num_participants" ) ) ) {
@@ -518,26 +534,26 @@ static xt_status jabber_parse_muc_list( struct im_connection *ic, struct xt_node
 			}
 		}
 
-		gc = bee_chat_by_title(ic->bee, ic, jid);
-		if ( !gc ) {
+	gc = bee_chat_by_title(ic->bee, ic, jid);
+	if ( !gc ) {
 			gc = imcb_chat_new(ic, jid);
 		}
-		imcb_chat_name_hint(gc, name);
-		imcb_chat_topic(gc, NULL, topic, 0);
+	imcb_chat_name_hint(gc, name);
+	imcb_chat_topic(gc, NULL, topic, 0);
 
-		ircc = gc->ui_data;
-		set_setstr( &ircc->set, "account", ic->acc->tag );
-		set_setstr( &ircc->set, "room", jid );
-		set_setstr( &ircc->set, "chat_type", "room" );
+	ircc = gc->ui_data;
+	set_setstr( &ircc->set, "account", ic->acc->tag );
+	set_setstr( &ircc->set, "room", jid );
+	set_setstr( &ircc->set, "chat_type", "room" );
 
-		/* This cleans everything but leaves the irc channel around,
-		 * since it just graduated to a room.*/
-		imcb_chat_free( gc );
-
-		c = c->next;
+	if ( auto_join )
+	{
+		set_setstr( &ircc->set, "auto_join", "true" );
 	}
-	return XT_HANDLED;
 
+	/* This cleans everything but leaves the irc channel around,
+     * since it just graduated to a room.*/
+	imcb_chat_free( gc );
 }
 
 int jabber_get_vcard( struct im_connection *ic, char *bare_jid )
@@ -680,28 +696,27 @@ static xt_status jabber_iq_display_vcard( struct im_connection *ic, struct xt_no
 	return XT_HANDLED;
 }
 
-int jabber_get_hipchat_profile( struct im_connection *ic )
+int jabber_get_hipchat_startup( struct im_connection *ic )
 {
-	struct jabber_data *jd = ic->proto_data;
 	struct xt_node *node;
 	int st;
-	
-	imcb_log( ic, "Fetching hipchat profile for %s", jd->me );
-	
+
+	imcb_log( ic, "Fetching hipchat startup" );
+
 	node = xt_new_node( "query", NULL, NULL );
-	xt_add_attr( node, "xmlns", XMLNS_HIPCHAT_PROFILE );
-	node = jabber_make_packet( "iq", "get", jd->me, node );
-	
-	jabber_cache_add( ic, node, jabber_parse_hipchat_profile );
+	xt_add_attr( node, "xmlns", XMLNS_HIPCHAT_STARTUP);
+	node = jabber_make_packet( "iq", "get", NULL, node );
+
+	jabber_cache_add( ic, node, jabber_parse_hipchat_startup );
 	st = jabber_write_packet( ic, node );
-	
+
 	return st;
 }
 
-static xt_status jabber_parse_hipchat_profile( struct im_connection *ic, struct xt_node *node, struct xt_node *orig ) {
-	struct xt_node *query, *name_node;
+static xt_status jabber_parse_hipchat_startup( struct im_connection *ic, struct xt_node *node, struct xt_node *orig ) {
+	struct xt_node *query, *name_node, *prefs_node, *autojoin_node, *c, *c2;
 	//char *name;
-	
+
 	if( !( query = xt_find_node( node->children, "query" ) ) )
 	{
 		imcb_log( ic, "Warning: Received NULL profile packet" );
@@ -711,11 +726,27 @@ static xt_status jabber_parse_hipchat_profile( struct im_connection *ic, struct 
 	name_node = xt_find_node( query->children, "name" );
 	if ( !name_node )
 	{
-		imcb_log( ic, "Warning: Can't find real name in profile. Joining groupchats will not be possible." );
+		imcb_log( ic, "Warning: Can't find real name in startup. Joining groupchats will not be possible." );
 		return XT_ABORT;
 	}
 
 	set_setstr( &ic->acc->set, "display_name", name_node->text );
+
+	prefs_node = xt_find_node( query->children, "preferences" );
+	autojoin_node = xt_find_node( prefs_node->children, "autoJoin" );
+
+	c = autojoin_node->children;
+	while( ( c = xt_find_node( c, "item" ) ) )
+	{
+		c2 = xt_find_node_by_attr( c->children, "x", "xmlns", XMLNS_HIPCHAT_MUC );
+
+		if( c2 ) {
+			jabber_parse_muc_item(ic, c, TRUE);
+		}
+
+		c = c->next;
+	}
+
 	return XT_HANDLED;
 
 }
