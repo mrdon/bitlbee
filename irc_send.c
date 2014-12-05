@@ -164,7 +164,8 @@ void irc_rootmsg( irc_t *irc, char *format, ... )
 {
 	va_list params;
 	va_start( params, format );
-	irc_usermsg_( "PRIVMSG", irc->root, format, params );
+	vfprintf( stdout, format, params );
+//	irc_usermsg_( "PRIVMSG", irc->root, format, params );
 	va_end( params );
 }
 

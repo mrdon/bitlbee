@@ -325,6 +325,7 @@ void irc_send_login( irc_t *irc );
 void irc_send_motd( irc_t *irc );
 const char *irc_user_msgdest( irc_user_t *iu );
 void irc_rootmsg( irc_t *irc, char *format, ... );
+void cmd_account( irc_t *irc, char **cmd );
 void irc_usermsg( irc_user_t *iu, char *format, ... );
 void irc_usernotice( irc_user_t *iu, char *format, ... );
 void irc_send_join( irc_channel_t *ic, irc_user_t *iu );

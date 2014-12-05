@@ -744,9 +744,13 @@ int irc_check_login( irc_t *irc )
 {
 	if( irc->user->user && irc->user->nick )
 	{
-		if( global.conf->authmode == AUTHMODE_CLOSED && !( irc->status & USTATUS_AUTHORIZED ) )
+		if( global.conf->authmode == AUTHMODE_CLOSED && !( irc->status & USTATUS_AUTHORIZED ) ) {
+			irc_send_num(irc, 464, ":This server is password-protected.");
+			return 0;
+		}
+		else if (irc->password == NULL)
 		{
-			irc_send_num( irc, 464, ":This server is password-protected." );
+			irc_send_num(irc, 464, ":This server requires a HipChat account password.");
 			return 0;
 		}
 		else
@@ -761,11 +765,12 @@ int irc_check_login( irc_t *irc )
 			irc->user->f = &irc_user_self_funcs;
 			g_free( iu->nick );
 			g_free( iu );
-			
+
 			if( global.conf->runmode == RUNMODE_FORKDAEMON || global.conf->runmode == RUNMODE_DAEMON )
 				ipc_to_master_str( "CLIENT %s %s :%s\r\n", irc->user->host, irc->user->nick, irc->user->fullname );
 			
 			irc->status |= USTATUS_LOGGED_IN;
+			irc->status |= USTATUS_IDENTIFIED;
 			
 			irc_send_login( irc );
 			
@@ -774,28 +779,38 @@ int irc_check_login( irc_t *irc )
 			
 			ic = irc->default_channel = irc_channel_new( irc, ROOT_CHAN );
 			irc_channel_set_topic( ic, CONTROL_TOPIC, irc->root );
-			set_setstr( &ic->set, "auto_join", "true" );
+//			set_setstr( &ic->set, "auto_join", "true" );
 			irc_channel_auto_joins( irc, NULL );
 			
 			irc->root->last_channel = irc->default_channel;
-			
-			irc_rootmsg( irc,
-			             "Welcome to the BitlBee gateway!\n\n"
-			             "If you've never used BitlBee before, please do read the help "
-			             "information using the \x02help\x02 command. Lots of FAQs are "
-			             "answered there.\n"
-			             "If you already have an account on this server, just use the "
-			             "\x02identify\x02 command to identify yourself." );
+
+//			irc_rootmsg( irc, "logging on %s with %s", irc->user->user, irc->password );
+			char *add_cmd[] = { "", "add", "hipchat", g_strdup(irc->user->user), g_strdup( irc->password ), NULL };
+			cmd_account( irc, add_cmd );
+			g_free( add_cmd[3] );
+			g_free( add_cmd[4] );
+
+			char *on_cmd[] = { "", "hipchat", "on" , NULL};
+			cmd_account( irc, on_cmd );
+
+//			irc_rootmsg( irc,
+//			             "Welcome to the BitlBee gateway!\n\n"
+//			             "If you've never used BitlBee before, please do read the help "
+//			             "information using the \x02help\x02 command. Lots of FAQs are "
+//			             "answered there.\n"
+//			             "If you already have an account on this server, just use the "
+//			             "\x02identify\x02 command to identify yourself." );
 			
 			/* This is for bug #209 (use PASS to identify to NickServ). */
-			if( irc->password != NULL )
-			{
-				char *send_cmd[] = { "identify", g_strdup( irc->password ), NULL };
-				
-				irc_setpass( irc, NULL );
-				root_command( irc, send_cmd );
-				g_free( send_cmd[1] );
-			}
+			// TODO: force server password to be used to match for user, and not allow a connect anyway
+//			if( irc->password != NULL )
+//			{
+//				char *send_cmd[] = { "identify", g_strdup( irc->password ), NULL };
+//
+//				irc_setpass( irc, NULL );
+//				root_command( irc, send_cmd );
+//				g_free( send_cmd[1] );
+//			}
 			
 			return 1;
 		}

@@ -461,7 +461,7 @@ static xt_status jabber_parse_roster( struct im_connection *ic, struct xt_node *
 	
 	if( initial )
 		imcb_connected( ic );
-	
+
 	return XT_HANDLED;
 }
 
@@ -485,7 +485,7 @@ int jabber_iq_disco_muc( struct im_connection *ic, char *muc_server )
 static xt_status jabber_parse_muc_list( struct im_connection *ic, struct xt_node *node, struct xt_node *orig )
 {
 	struct xt_node *query, *c;
-	
+
 	if( !( query = xt_find_node( node->children, "query" ) ) )
 	{
 		imcb_log( ic, "Warning: Received NULL MUC list packet" );

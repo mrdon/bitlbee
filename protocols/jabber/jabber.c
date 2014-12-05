@@ -228,7 +228,7 @@ void jabber_connect( struct im_connection *ic )
 		connect_to = jd->server;
 	
 	imcb_log( ic, "Connecting" );
-	
+
 	for( i = 0; jabber_port_list[i] > 0; i ++ )
 		if( set_getint( &acc->set, "port" ) == jabber_port_list[i] )
 			break;

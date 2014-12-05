@@ -40,7 +40,7 @@ help_t *help_init( help_t **help, const char *helpfile )
 	struct stat stat[1];
 	
 	*help = h = g_new0 ( help_t, 1 );
-	
+
 	h->fd = open( helpfile, O_RDONLY );
 	
 	if( h->fd == -1 )

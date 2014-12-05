@@ -98,7 +98,6 @@ static void cmd_help( irc_t *irc, char **cmd )
 	}
 }
 
-static void cmd_account( irc_t *irc, char **cmd );
 static void bitlbee_whatsnew( irc_t *irc );
 
 static void cmd_identify( irc_t *irc, char **cmd )
@@ -392,7 +391,7 @@ static int cmd_account_set_checkflags( irc_t *irc, set_t *s )
 	return 1;
 }
 
-static void cmd_account( irc_t *irc, char **cmd )
+void cmd_account( irc_t *irc, char **cmd )
 {
 	account_t *a;
 	int len;
@@ -1443,29 +1442,29 @@ static void bitlbee_whatsnew( irc_t *irc )
 
 /* IMPORTANT: Keep this list sorted! The short command logic needs that. */
 command_t root_commands[] = {
-	{ "account",        1, cmd_account,        0 },
-	{ "add",            2, cmd_add,            0 },
-	{ "allow",          1, cmd_allow,          0 },
-	{ "blist",          0, cmd_blist,          0 },
-	{ "block",          1, cmd_block,          0 },
-	{ "channel",        1, cmd_channel,        0 },
-	{ "chat",           1, cmd_chat,           0 },
-	{ "drop",           1, cmd_drop,           0 },
-	{ "ft",             0, cmd_transfer,       0 },
-	{ "group",          1, cmd_group,          0 },
-	{ "help",           0, cmd_help,           0 }, 
+//	{ "account",        1, cmd_account,        0 },
+//	{ "add",            2, cmd_add,            0 },
+//	{ "allow",          1, cmd_allow,          0 },
+//	{ "blist",          0, cmd_blist,          0 },
+//	{ "block",          1, cmd_block,          0 },
+//	{ "channel",        1, cmd_channel,        0 },
+//	{ "chat",           1, cmd_chat,           0 },
+//	{ "drop",           1, cmd_drop,           0 },
+//	{ "ft",             0, cmd_transfer,       0 },
+//	{ "group",          1, cmd_group,          0 },
+//	{ "help",           0, cmd_help,           0 },
 	{ "identify",       0, cmd_identify,       0 },
-	{ "info",           1, cmd_info,           0 },
-	{ "nick",           1, cmd_nick,           0 },
-	{ "no",             0, cmd_yesno,          0 },
-	{ "qlist",          0, cmd_qlist,          0 },
-	{ "register",       0, cmd_register,       0 },
-	{ "remove",         1, cmd_remove,         0 },
-	{ "rename",         2, cmd_rename,         0 },
-	{ "save",           0, cmd_save,           0 },
-	{ "set",            0, cmd_set,            0 },
-	{ "transfer",       0, cmd_transfer,       0 },
-	{ "yes",            0, cmd_yesno,          0 },
+//	{ "info",           1, cmd_info,           0 },
+//	{ "nick",           1, cmd_nick,           0 },
+//	{ "no",             0, cmd_yesno,          0 },
+//	{ "qlist",          0, cmd_qlist,          0 },
+//	{ "register",       0, cmd_register,       0 },
+//	{ "remove",         1, cmd_remove,         0 },
+//	{ "rename",         2, cmd_rename,         0 },
+//	{ "save",           0, cmd_save,           0 },
+//	{ "set",            0, cmd_set,            0 },
+//	{ "transfer",       0, cmd_transfer,       0 },
+//	{ "yes",            0, cmd_yesno,          0 },
 	/* Not expecting too many plugins adding root commands so just make a
 	   dumb array with some empty entried at the end. */
 	{ NULL },
